@@ -1,7 +1,8 @@
 import sys
 from datetime import datetime
 from pathlib import Path
-import urllib.request
+import requests
+import os
 
 
 def main(argv: list[str]):
@@ -11,9 +12,11 @@ def main(argv: list[str]):
         print(f"{day_dir} already exists")
         return 1
     day_dir.mkdir(parents=True)
-    urllib.request.urlretrieve(
-        f"https://adventofcode.com/2023/day/{day}/input", day_dir / "input"
+    input_data = requests.get(
+        f"https://adventofcode.com/2023/day/{day}/input",
+        cookies={"session": os.environ["ADVENT_OF_CODE_SESSION_COOKIE"]},
     )
+    (day_dir / "input").write_bytes(input_data.content)
 
 
 if __name__ == "__main__":
