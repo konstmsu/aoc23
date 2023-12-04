@@ -1,4 +1,5 @@
 import logging
+import zoneinfo
 import os
 import subprocess
 import sys
@@ -42,12 +43,13 @@ def extract_sample(year: int, day: int):
     return parse_sample(response.text)
 
 
-def main(argv: list[str]):
+def main():
     structlog.configure(
         wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
     )
-    year = datetime.today().year
-    day = int(argv[1]) if len(argv) == 2 else datetime.today().day
+    now = datetime.now(zoneinfo.ZoneInfo("EST"))
+    year = now.year
+    day = now.day
     day_dir = (Path(__file__).parent / f"d{day:02d}").absolute()
     if day_dir.exists():
         logger.warning(f"{day_dir} already exists")
@@ -77,4 +79,4 @@ print(f"{lines=}")
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv) or 0)
+    sys.exit(main() or 0)
