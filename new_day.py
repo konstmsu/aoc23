@@ -1,5 +1,4 @@
 import logging
-import zoneinfo
 import os
 import subprocess
 import sys
@@ -11,6 +10,7 @@ from pathlib import Path
 
 import requests
 import structlog
+import zoneinfo
 
 logger = structlog.get_logger()
 
@@ -73,7 +73,7 @@ print(f"{lines=}")
         sample_txt = day_dir / "sample.txt"
         sample_txt.write_text(extract_sample(year=year, day=day))
         logger.info(f"Written {sample_txt}")
-    except:
+    except Exception:
         traceback.print_exception()
     webbrowser.open(f"https://adventofcode.com/2023/day/{day}")
 
