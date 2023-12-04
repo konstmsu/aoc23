@@ -3,6 +3,9 @@ from datetime import datetime
 from pathlib import Path
 import requests
 import os
+import webbrowser
+
+webbrowser.open("http://google.co.kr", new=2)
 
 
 def main(argv: list[str]):
@@ -16,7 +19,8 @@ def main(argv: list[str]):
         f"https://adventofcode.com/2023/day/{day}/input",
         cookies={"session": os.environ["ADVENT_OF_CODE_SESSION_COOKIE"]},
     )
-    (day_dir / "input").write_bytes(input_data.content)
+    (day_dir / "input.txt").write_bytes(input_data.content)
+    webbrowser.open(f"https://adventofcode.com/2023/day/{day}")
 
 
 if __name__ == "__main__":
