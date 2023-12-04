@@ -6,7 +6,7 @@ from new_day import extract_sample, parse_sample
 def test_parse_sample():
     assert (
         parse_sample(
-            (Path(__file__).parent / "_test_data" / "sample2023-02.html").read_bytes()
+            (Path(__file__).parent / "_test_data" / "sample2023-02.html").read_text()
         )
         == (Path(__file__).parent / "d02" / "sample").read_text()
     )

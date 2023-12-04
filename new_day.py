@@ -1,11 +1,17 @@
-from functools import cached_property
-import sys
-from datetime import datetime
-from pathlib import Path
-import requests
+import logging
 import os
+import subprocess
+import sys
 import traceback
 import webbrowser
+from datetime import datetime
+from functools import cached_property
+from pathlib import Path
+
+import requests
+import structlog
+
+logger = structlog.get_logger()
 
 
 class AocWebsite:
@@ -16,7 +22,7 @@ class AocWebsite:
         }
 
     def get(self, url: str):
-        print(f"GET {url}")
+        logger.debug(f"GET {url}")
         return requests.get(
             url,
             cookies=self._cookies,
@@ -33,33 +39,38 @@ def parse_sample(html: str):
 
 def extract_sample(year: int, day: int):
     response = AocWebsite().get(f"https://adventofcode.com/{year}/day/{day}")
-    html = response.text
-    (Path(__file__).parent / "_test_data" / f"sample{year}-{day:02d}.html").write_bytes(
-        response.content
-    )
-    return parse_sample(html)
+    return parse_sample(response.text)
 
 
 def main(argv: list[str]):
+    structlog.configure(
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+    )
     year = datetime.today().year
     day = int(argv[1]) if len(argv) == 2 else datetime.today().day
     day_dir = (Path(__file__).parent / f"d{day:02d}").absolute()
     if day_dir.exists():
-        print(f"{day_dir} already exists")
+        logger.warning(f"{day_dir} already exists")
         return 1
     day_dir.mkdir(parents=True)
-    input_data = AocWebsite().get(
-        f"https://adventofcode.com/2023/day/{day}/input",
-    )
-    (day_dir / "input.txt").write_bytes(input_data.content)
-    (day_dir / "__main__.py").write_text(
+    input_data = AocWebsite().get(f"https://adventofcode.com/2023/day/{day}/input")
+    input_txt = day_dir / "input.txt"
+    input_txt.write_bytes(input_data.content)
+    logger.info(f"Written {input_txt}")
+    main_py = day_dir / "__main__.py"
+    main_py.write_text(
         """from pathlib import Path
                                        
-lines = (Path(__file__).parent / "input.txt").read_text().splitlines(keepends=False)
+lines = (Path(__file__).parent / "sample.txt").read_text().splitlines(keepends=False)
+print(f"{lines=}")
 """
     )
+    logger.info(f"Created {main_py}")
+    subprocess.run(["open", main_py], check=True)
     try:
-        extract_sample(year=year, day=day)
+        sample_txt = day_dir / "sample.txt"
+        sample_txt.write_text(extract_sample(year=year, day=day))
+        logger.info(f"Written {sample_txt}")
     except:
         traceback.print_exception()
     webbrowser.open(f"https://adventofcode.com/2023/day/{day}")
