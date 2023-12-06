@@ -30,3 +30,16 @@ for time, distance in zip(tt, dd):
     prod *= count(time, distance)
 
 print(f"{prod=}")
+
+
+# part 2
+def get_number2(line: str):
+    return int(line.split(":")[1].replace(" ", ""))
+
+
+t = get_number2(lines[0])
+d = get_number2(lines[1])
+
+print(f"{count(t, d)=}")
+
+# 42515755 is correct
